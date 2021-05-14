@@ -1,4 +1,6 @@
 from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+import time
 import unittest
 
 
@@ -21,15 +23,30 @@ class NewVisitorTest(unittest.TestCase):
 
         # She sees, what a title and header tell about lists urgent tasks.
         self.assertIn('To-Do', self.browser.title)
-        self.fail('Finish test!')
+        header_text = self.browser.find_element_by_tag_name('h1').text
+        self.assertIn('To-Do', header_text)
 
+        # To her immediately is suggested to enter a unit of list
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        self.assertEqual(
+            inputbox.get_attribute('placeholder'),
+            'Enter a to-do item'
+        )
 
-# To her immediately is suggested to enter a unit of list
-# She types in a text field "Buy a new flash drive"
+        # She types in a text field "Buy a new flash drive"
+        inputbox.send_keys('Buy flash drive')
 
-# When she push on enter, the page is reloading, and now the page contains
-# "1: Buy a new flash drive" as a unit of item of list
+        # When she push on enter, the page is reloading, and now the page contains
+        # "1: Buy a new flash drive" as a unit of item of list
+        inputbox.send_keys(Keys.ENTER)
+        time.sleep(1)
 
+        table = self.browser.find_element_by_id('id_list_table')
+        rows = table.find_elements_by_tag_name('tr')
+        self.assertTrue(
+            any(row.text == '1: Buy flash drive' for row in rows)
+        )
+        self.fail('Finish the test!')
 # The field of text still invites her to add yet one element.
 # She enters "To make a write on flash drive"
 
